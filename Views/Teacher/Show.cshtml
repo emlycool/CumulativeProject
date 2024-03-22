@@ -1,0 +1,38 @@
+﻿@model CumulativeProject.Models.Teacher
+@{
+    ViewBag.Title = $"{Model.FirstName} {Model.LastName}";
+}
+
+<div class="container">
+    <h1>Show Teacher Details</h1>
+    <hr />
+    <div class="row">
+        <div class="col-md-6">
+            <dl class="row">
+                <dt class="col-sm-4">ID:</dt>
+                <dd class="col-sm-8">@Model.Id</dd>
+
+                <dt class="col-sm-4">First Name:</dt>
+                <dd class="col-sm-8">@Model.FirstName</dd>
+
+                <dt class="col-sm-4">Last Name:</dt>
+                <dd class="col-sm-8">@Model.LastName</dd>
+
+                <dt class="col-sm-4">Employee Number:</dt>
+                <dd class="col-sm-8">@Model.EmployeeNumber</dd>
+
+                <dt class="col-sm-4">Hire Date:</dt>
+                <dd class="col-sm-8">@Model.HireDate.ToShortDateString()</dd>
+
+                <dt class="col-sm-4">Salary:</dt>
+                <dd class="col-sm-8">$@Model.Salary</dd>
+            </dl>
+        </div>
+
+        <div class="col-md-12 mt-3">
+            <h3>Classes</h3>
+            <table class="table table-striped">
+
+            </table>
+        </div>
+    </div>

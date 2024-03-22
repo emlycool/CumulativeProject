@@ -1,0 +1,78 @@
+﻿@{
+    ViewBag.Title = "Teachers";
+}
+
+<div class="container">
+    <h1>Teacher List</h1>
+
+    <!-- Search Bar -->
+    <div class="mb-3">
+        <input id="search-input" type="text" class="form-control" placeholder="Search teachers...">
+    </div>
+
+    <table id="teachers-table" class="table table-striped">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>First Name</th>
+                <th>Last Name</th>
+                <th>Employee Number</th>
+                <th>Hire Date</th>
+                <th>Salary</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Table body will be dynamically populated -->
+        </tbody>
+    </table>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const searchInput = document.querySelector("#search-input");
+        const tableBody = document.querySelector("#teachers-table tbody");
+
+        // fetch teachers data with optional search query
+        function fetchTeachers(searchQuery = "") {
+            const url = new URL("/api/teachers", window.location.origin);
+            url.searchParams.append("searchQuery", searchQuery);
+
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+
+                    tableBody.innerHTML = "";
+
+                    data.forEach(teacher => {
+                        const hireDate = new Date(teacher.HireDate);
+                        const hireDateString = hireDate.toLocaleDateString();
+                        const salaryString = teacher.Salary.toFixed(2);
+
+                        const row = `<tr>
+                        <td>${teacher.Id}</td>
+                        <td>${teacher.FirstName}</td>
+                        <td>${teacher.LastName}</td>
+                        <td>${teacher.EmployeeNumber}</td>
+                        <td>${hireDateString}</td>
+                        <td>$${salaryString}</td>
+                        <td>
+                            <a class="btn-primary btn" href="/teachers/${teacher.Id}">View Details</a>
+                        </tr>`;
+
+                        tableBody.innerHTML += row;
+                    });
+                })
+                .catch(error => {
+                    console.error("Error fetching teachers:", error);
+                });
+        }
+
+        fetchTeachers();
+
+        searchInput.addEventListener("input", function () {
+            fetchTeachers(searchInput.value);
+        });
+
+    });
+</script>
