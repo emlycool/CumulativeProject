@@ -1,4 +1,5 @@
-﻿using CumulativeProject.Interfaces;
+﻿using System;
+using CumulativeProject.Interfaces;
 using MySql.Data.MySqlClient;
 
 namespace CumulativeProject.Data
@@ -21,13 +22,16 @@ namespace CumulativeProject.Data
             {
                 //convert zero datetime is a db connection setting which returns NULL if the date is 0000-00-00
                 //this can allow C# to have an easier interpretation of the date (no date instead of 0 BCE)
+                string server = DotNetEnv.Env.GetString("DbServer", "localhost");
+                string user = DotNetEnv.Env.GetString("DbUser", "root");
+                string password = DotNetEnv.Env.GetString("DbPassword", "password");
+                string database = DotNetEnv.Env.GetString("DbName");
+                string port = DotNetEnv.Env.GetString("DbPort", "3306");
 
-                return "server = " + Server
-                    + "; user = " + User
-                    + "; database = " + Database
-                    + "; port = " + Port
-                    + "; password = " + Password
-                    + "; convert zero datetime = True";
+                // Build the connection string
+                string connectionString = $"server={server};user={user};database={database};port={port};password={password};convert zero datetime=True";
+
+                return connectionString;
             }
         }
         //This is the method we actually use to get the database!

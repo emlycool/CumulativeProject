@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net.Http.Headers;
 using System.Web;
@@ -23,6 +24,14 @@ namespace CumulativeProject
             RouteConfig.RegisterRoutes(RouteTable.Routes);
             BundleConfig.RegisterBundles(BundleTable.Bundles);
             BundleConfig.RegisterBundles(BundleTable.Bundles);
+
+            // Get the directory where the application is running
+            string appDirectory = AppDomain.CurrentDomain.BaseDirectory;
+
+            // Construct the file path to the .env file
+            string filePath = Path.Combine(appDirectory, ".env");
+            // Load environment variables from .env file
+            DotNetEnv.Env.Load(filePath);
         }
     }
 }

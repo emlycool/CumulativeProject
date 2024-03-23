@@ -1,4 +1,8 @@
-﻿using System.Web.Mvc;
+﻿using System;
+using System.Configuration;
+using System.IO;
+using System.Linq;
+using System.Web.Mvc;
 using CumulativeProject.Models;
 using CumulativeProject.Repositories;
 
@@ -42,7 +46,8 @@ namespace CumulativeProject.Controllers
         [Route("teachers/{id}", Name = "Teachers.Show")]
         public ActionResult Show(int id) {
             Teacher teacher = this.TeacherRepository.Find(id);
-            if(teacher == null) { 
+            if (teacher == null)
+            {
                 return HttpNotFound();
             }
             return View("Show", teacher);
