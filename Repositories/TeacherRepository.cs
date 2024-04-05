@@ -109,6 +109,12 @@ namespace CumulativeProject.Repositories
             return teacher;
         }
 
+
+        public Teacher StoreTeacher()
+        {
+
+        }
+
         /// <summary>
         /// Hydrates a list of dictionaries representing teacher data into a list of Teacher objects.
         /// </summary>

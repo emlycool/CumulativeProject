@@ -1,8 +1,4 @@
-﻿using System;
-using System.Configuration;
-using System.IO;
-using System.Linq;
-using System.Web.Mvc;
+﻿using System.Web.Mvc;
 using CumulativeProject.Models;
 using CumulativeProject.Repositories;
 
@@ -51,6 +47,13 @@ namespace CumulativeProject.Controllers
                 return HttpNotFound();
             }
             return View("Show", teacher);
+        }
+
+        [HttpGet]
+        [Route("teachers/create", Name = "Teachers.Create")]
+        public ActionResult Create()
+        {
+            return View("Create");
         }
     }
 }

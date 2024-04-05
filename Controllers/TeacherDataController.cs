@@ -41,5 +41,21 @@ namespace CumulativeProject.Controllers
                 return Ok(this.TeacherRepository.Search(searchQuery));
             }
         }
+
+        [HttpPost]
+        [Route("api/teachers")]
+        public IHttpActionResult StoreTeacher([FromBody]Teacher teacher)
+        {
+            if (!ModelState.IsValid)
+            {
+                var errors = ModelState.Where(x => x.Value.Errors.Any())
+                                    .ToDictionary(x => x.Key, x => x.Value.Errors.First().ErrorMessage);
+
+
+                return Json(new { success = false, errors = errors });
+            }
+
+            return Ok(teacher);
+        }
     }
 }

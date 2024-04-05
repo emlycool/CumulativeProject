@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using CumulativeProject.Interfaces;
 using MySql.Data.MySqlClient;
 
@@ -24,7 +25,7 @@ namespace CumulativeProject.Data
                 //this can allow C# to have an easier interpretation of the date (no date instead of 0 BCE)
                 string server = DotNetEnv.Env.GetString("DbServer", "localhost");
                 string user = DotNetEnv.Env.GetString("DbUser", "root");
-                string password = DotNetEnv.Env.GetString("DbPassword", "password");
+                string password = DotNetEnv.Env.GetString("DbPassword", "");
                 string database = DotNetEnv.Env.GetString("DbName");
                 string port = DotNetEnv.Env.GetString("DbPort", "3306");
 

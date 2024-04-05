@@ -55,6 +55,27 @@ namespace CumulativeProject.Repositories
             }
         }
 
+
+        /// <summary>
+        /// Inserts data into the table.
+        /// </summary>
+        /// <param name="values">A dictionary containing column name-value pairs for the row to be inserted.</param>
+        public void Insert(Dictionary<string, object> values)
+        {
+            string columns = string.Join(", ", values.Keys);
+            string parameters = string.Join(", ", values.Keys);
+            string query = $"INSERT INTO {this.Table} ({columns}) VALUES ({parameters})";
+
+            List<MySqlParameter> parametersList = new List<MySqlParameter>();
+
+            foreach (var pair in values)
+            {
+                parametersList.Add(new MySqlParameter($"@{pair.Key}", pair.Value));
+            }
+
+            this.Query(query, (reader, connection) => { }, parametersList.ToArray());
+        }
+
         /// <summary>
         /// Retrieves all rows from the table.
         /// </summary>

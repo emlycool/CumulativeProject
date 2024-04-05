@@ -1,0 +1,84 @@
+﻿@{
+    ViewBag.Title = "Create a new Teacher";
+}
+
+
+<div class="container">
+    <h1>Add a new Teacher</h1>
+    <form id="createTeacherForm" novalidate>
+        <div class="form-group">
+            <label for="firstName">First Name:</label>
+            <input type="text" class="form-control" id="firstName" placeholder="Enter first name" required>
+            <div class="invalid-feedback">Please enter first name.</div>
+        </div>
+        <div class="form-group">
+            <label for="lastName">Last Name:</label>
+            <input type="text" class="form-control" id="lastName" placeholder="Enter last name" required>
+            <div class="invalid-feedback">Please enter last name.</div>
+        </div>
+        <div class="form-group">
+            <label for="employeeNumber">Employee Number:</label>
+            <input type="text" class="form-control" id="employeeNumber" placeholder="Enter employee number" required>
+            <div class="invalid-feedback">Please enter employee number.</div>
+        </div>
+        <div class="form-group">
+            <label for="hireDate">Hire Date:</label>
+            <input type="date" class="form-control" id="hireDate" required>
+            <div class="invalid-feedback">Please enter hire date.</div>
+        </div>
+        <div class="form-group">
+            <label for="salary">Salary:</label>
+            <input type="number" class="form-control" id="salary" placeholder="Enter salary" required>
+            <div class="invalid-feedback">Please enter salary.</div>
+        </div>
+        <button type="submit" class="btn btn-primary">Create</button>
+    </form>
+</div>
+
+<script>
+    document.getElementById('createTeacherForm').addEventListener('submit', function(event) {
+      event.preventDefault();
+      event.stopPropagation(); // prevent event bubbling
+
+      // Check form validation
+      if (!this.checkValidity()) {
+        this.classList.add('was-validated');
+        return;
+      }
+
+      // Get form data
+      const formData = {
+        firstName: document.getElementById('firstName').value,
+        lastName: document.getElementById('lastName').value,
+        employeeNumber: document.getElementById('employeeNumber').value,
+        hireDate: document.getElementById('hireDate').value,
+        salary: document.getElementById('salary').value
+      };
+
+      // Send data to API endpoint
+      fetch('https://example.com/api/teachers', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(formData)
+      })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Failed to create teacher');
+        }
+        return response.json();
+      })
+      .then(data => {
+        console.log('Teacher created:', data);
+        alert('Teacher created successfully');
+        // Reset form after successful submission
+        document.getElementById('createTeacherForm').reset();
+        document.getElementById('createTeacherForm').classList.remove('was-validated');
+      })
+      .catch(error => {
+        console.error('Error:', error.message);
+        alert('Failed to create teacher');
+      });
+    });
+</script>
