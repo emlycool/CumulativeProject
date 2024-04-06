@@ -5,9 +5,16 @@
 <div class="container">
     <h1>Teacher List</h1>
 
-    <!-- Search Bar -->
-    <div class="mb-3">
-        <input id="search-input" type="text" class="form-control" placeholder="Search teachers...">
+    <div class="d-flex justify-content-between">
+        <!-- Search Bar -->
+        <div>
+            <input id="search-input" type="text" class="form-control" placeholder="Search teachers...">
+        </div>
+
+        <!-- Create Teacher -->
+        <div>
+            <a class="btn-primary btn" href="/teachers/create">Create Teacher</a>
+        </div>
     </div>
 
     <table id="teachers-table" class="table table-striped">
@@ -33,10 +40,12 @@
         const searchInput = document.querySelector("#search-input");
         const tableBody = document.querySelector("#teachers-table tbody");
 
-        // fetch teachers data with optional search query
+        // Function to fetch teachers data with optional search query
         function fetchTeachers(searchQuery = "") {
             const url = new URL("/api/teachers", window.location.origin);
             url.searchParams.append("searchQuery", searchQuery);
+
+            tableBody.innerHTML = `<tr><td colspan="7" class="text-center">Please wait ...</td></tr>`;
 
             fetch(url)
                 .then(response => response.json())
@@ -57,14 +66,49 @@
                         <td>${hireDateString}</td>
                         <td>$${salaryString}</td>
                         <td>
-                            <a class="btn-primary btn" href="/teachers/${teacher.Id}">View Details</a>
+                            <a class="btn-primary btn" href="/teachers/${teacher.Id}">View</a>
+                            <a class="btn-success btn" href="/teachers/edit/${teacher.Id}">Edit</a>
+                            <button class="btn-danger btn delete-teacher" data-id="${teacher.Id}">Delete</button>
                         </tr>`;
 
                         tableBody.innerHTML += row;
                     });
+
+                    // Add event listeners to delete buttons
+                    const deleteButtons = document.querySelectorAll(".delete-teacher");
+                    deleteButtons.forEach(button => {
+                        button.addEventListener("click", function () {
+                            const teacherId = this.getAttribute("data-id");
+                            if (confirm("Are you sure you want to delete this teacher?")) {
+                                deleteTeacher(teacherId);
+                            }
+                        });
+                    });
                 })
                 .catch(error => {
                     console.error("Error fetching teachers:", error);
+                });
+        }
+
+        // Function to delete teacher
+        function deleteTeacher(teacherId) {
+            fetch(`/api/teachers/${teacherId}`, {
+                method: 'DELETE'
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to delete teacher');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Teacher deleted:', data);
+                    alert('Teacher deleted successfully');
+                    fetchTeachers(searchInput.value);
+                })
+                .catch(error => {
+                    console.error('Error:', error.message);
+                    alert('Failed to delete teacher');
                 });
         }
 

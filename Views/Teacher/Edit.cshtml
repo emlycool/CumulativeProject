@@ -1,53 +1,51 @@
-﻿@{
-    ViewBag.Title = "Create a new Teacher";
+﻿@model CumulativeProject.Models.Teacher
+@{
+    ViewBag.Title = "Edit Teacher";
 }
 
 
 <div class="container">
-    <h1>Add a new Teacher</h1>
-    <form id="createTeacherForm" novalidate>
+    <h1>Edit Teacher</h1>
+    <form id="updateTeacherForm" novalidate>
         <div id="successAlert" class="alert alert-success d-none" role="alert">
-            Teacher created successfully.
+            Teacher updated successfully.
         </div>
         <div id="errorAlert" class="alert alert-danger d-none" role="alert">
-            Failed to create teacher.
+            Failed to update teacher.
         </div>
         <div class="form-group">
             <label for="firstName">First Name:</label>
-            <input type="text" class="form-control" id="firstName" placeholder="Enter first name" name="FirstName" required>
+            <input type="text" class="form-control" id="firstName" placeholder="Enter first name" name="FirstName" value="@Model.FirstName" required>
             <div class="invalid-feedback">Please enter first name.</div>
         </div>
         <div class="form-group">
             <label for="lastName">Last Name:</label>
-            <input type="text" class="form-control" id="lastName" placeholder="Enter last name" name="LastName" required>
+            <input type="text" class="form-control" id="lastName" placeholder="Enter last name" name="LastName" value="@Model.LastName" required>
             <div class="invalid-feedback">Please enter last name.</div>
         </div>
         <div class="form-group">
             <label for="employeeNumber">Employee Number:</label>
-            <input type="text" class="form-control" id="employeeNumber" placeholder="Enter employee number" name="EmployeeNumber" required>
+            <input type="text" class="form-control" id="employeeNumber" placeholder="Enter employee number" name="EmployeeNumber" value="@Model.EmployeeNumber" required>
             <div class="invalid-feedback">Please enter employee number.</div>
         </div>
         <div class="form-group">
             <label for="hireDate">Hire Date:</label>
-            <input type="date" class="form-control" id="hireDate" name="HireDate" required>
+            <input type="date" class="form-control" id="hireDate" name="HireDate" value="@(Model.HireDate?.ToString("yyyy-MM-dd"))" required>
             <div class="invalid-feedback">Please enter hire date.</div>
         </div>
         <div class="form-group">
             <label for="salary">Salary:</label>
-            <input type="number" class="form-control" id="salary" placeholder="Enter salary" name="Salary" required>
+            <input type="number" class="form-control" id="salary" placeholder="Enter salary" name="Salary" value="@Model.Salary" required>
             <div class="invalid-feedback">Please enter salary.</div>
         </div>
-        <button type="submit" class="btn btn-primary">Create</button>
+        <button type="submit" class="btn btn-primary">Update</button>
     </form>
 </div>
 
 <script>
-    document.getElementById('createTeacherForm').addEventListener('submit', function (event) {
+    document.getElementById('updateTeacherForm').addEventListener('submit', function (event) {
         event.preventDefault();
         event.stopPropagation();
-
-        event.target.querySelector("button").textContent = "please wait ..."
-        event.target.querySelector("button").disabled = true;
 
         // Check form validation
         if (!this.checkValidity()) {
@@ -58,10 +56,11 @@
         // Get form data
         const formData = Object.fromEntries(new FormData(event.target));
 
-        this.ta
+        event.target.querySelector("button").textContent = "please wait ..."
+        event.target.querySelector("button").disabled = true;
 
         // Send data to API endpoint
-        fetch("/api/teachers", {
+        fetch("/api/teachers/@Model.Id", {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -70,28 +69,29 @@
         })
             .then(response => {
                 if (!response.ok) {
-                    throw new Error('Failed to create teacher');
+                    throw new Error('Failed to update teacher');
                 }
                 return response.json();
             })
             .then(data => {
                 document.getElementById('successAlert').classList.remove('d-none');
-                document.getElementById('errorAlert').classList.add('d-none');
-                // Reset form
-                document.getElementById('createTeacherForm').reset();
-                document.getElementById('createTeacherForm').classList.remove('was-validated');
+                document.getElementById('errorAlert').classList.add('d-none')
+                document.getElementById('updateTeacherForm').classList.remove('was-validated');
             })
             .catch(error => {
                 document.getElementById('successAlert').classList.add('d-none');
                 document.getElementById('errorAlert').classList.remove('d-none');
+                event.target.querySelector("button").textContent = "Update"
+                event.target.querySelector("button").disabled = false;
             })
             .finally(data => {
                 setTimeout(() => {
                     document.getElementById('successAlert').classList.add('d-none');
-                    document.getElementById('errorAlert').classList.add('d-none');
+                    document.getElementById('errorAlert').classList.add('d-none');s
+
                 }, 5000)
 
-                event.target.querySelector("button").textContent = "Create"
+                event.target.querySelector("button").textContent = "Update"
                 event.target.querySelector("button").disabled = false;
             });
     });

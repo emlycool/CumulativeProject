@@ -1,6 +1,7 @@
-﻿@model CumulativeProject.Models.Teacher
+﻿@model CumulativeProject.Models.ViewModels.ShowTeacherVeiw
+
 @{
-    ViewBag.Title = $"{Model.FirstName} {Model.LastName}";
+    ViewBag.Title = $"{Model.Teacher.FirstName} {Model.Teacher.LastName}";
 }
 
 <div class="container">
@@ -10,30 +11,60 @@
         <div class="col-md-6">
             <dl class="row">
                 <dt class="col-sm-4">ID:</dt>
-                <dd class="col-sm-8">@Model.Id</dd>
+                <dd class="col-sm-8">@Model.Teacher.Id</dd>
 
                 <dt class="col-sm-4">First Name:</dt>
-                <dd class="col-sm-8">@Model.FirstName</dd>
+                <dd class="col-sm-8">@Model.Teacher.FirstName</dd>
 
                 <dt class="col-sm-4">Last Name:</dt>
-                <dd class="col-sm-8">@Model.LastName</dd>
+                <dd class="col-sm-8">@Model.Teacher.LastName</dd>
 
                 <dt class="col-sm-4">Employee Number:</dt>
-                <dd class="col-sm-8">@Model.EmployeeNumber</dd>
+                <dd class="col-sm-8">@Model.Teacher.EmployeeNumber</dd>
 
                 <dt class="col-sm-4">Hire Date:</dt>
-                <dd class="col-sm-8">@Model.HireDate.ToShortDateString()</dd>
+                <dd class="col-sm-8">@Model.Teacher.FormattedHireDate</dd>
+
 
                 <dt class="col-sm-4">Salary:</dt>
-                <dd class="col-sm-8">$@Model.Salary</dd>
+                <dd class="col-sm-8">@Model.Teacher.FormattedSalary</dd>
             </dl>
         </div>
 
         <div class="col-md-12 mt-3">
             <h3>Classes</h3>
             <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>S/N</th>
+                        <th>Class Code</th>
+                        <th>Start Date</th>
+                        <th>Finish Date</th>
+                        <th>Class Name</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (var i = 0; i < Model.TeacherClasses.Count; i++)
+                    {
+                        var teacherClass = Model.TeacherClasses[i];
+                        <tr>
+                            <td>@(i + 1)</td>
+                            <td>@teacherClass.ClassCode</td>
+                            <td>@teacherClass.StartDate.ToShortDateString()</td>
+                            <td>@teacherClass.FinishDate.ToShortDateString()</td>
+                            <td>@teacherClass.ClassName</td>
+                        </tr>
+                    }
 
+                    @if (Model.TeacherClasses.Count() == 0)
+                    {
+                        <tr>
+                            <td colspan="5" class="text-center">No data</td>
+                        </tr>
+                    }
+                </tbody>
             </table>
         </div>
+
     </div>
 </div>

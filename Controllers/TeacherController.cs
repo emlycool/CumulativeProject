@@ -1,5 +1,8 @@
-﻿using System.Web.Mvc;
+﻿using System.Collections.Generic;
+using System.Dynamic;
+using System.Web.Mvc;
 using CumulativeProject.Models;
+using CumulativeProject.Models.ViewModels;
 using CumulativeProject.Repositories;
 
 namespace CumulativeProject.Controllers
@@ -15,8 +18,15 @@ namespace CumulativeProject.Controllers
         /// Repository for accessing teacher data from database
         /// </summary>
         protected TeacherRepository TeacherRepository;
+
+        /// <summary>
+        /// Repository for accessing classes data from database
+        /// </summary>
+        protected ClassRepository ClassRepository;
+
         public TeacherController() { 
             this.TeacherRepository = new TeacherRepository();
+            this.ClassRepository = new ClassRepository();
         }
 
         /// <summary>
@@ -46,7 +56,15 @@ namespace CumulativeProject.Controllers
             {
                 return HttpNotFound();
             }
-            return View("Show", teacher);
+            List<TeacherClass> classes = this.ClassRepository.GetTeacherClasses(id);
+
+            ShowTeacherVeiw viewModel = new ShowTeacherVeiw
+            {
+                Teacher = teacher,
+                TeacherClasses = classes
+            };
+
+            return View("Show", viewModel);
         }
 
         [HttpGet]
@@ -54,6 +72,19 @@ namespace CumulativeProject.Controllers
         public ActionResult Create()
         {
             return View("Create");
+        }
+
+        [HttpGet]
+        [Route("teachers/edit/{id}", Name = "Teachers.Edit")]
+        public ActionResult Edit(int id)
+        {
+            Teacher teacher = this.TeacherRepository.Find(id);
+            if (teacher == null)
+            {
+                return HttpNotFound();
+            }
+
+            return View("Edit", teacher);
         }
     }
 }

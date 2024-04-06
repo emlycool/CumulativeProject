@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using CumulativeProject.Models;
 using MySql.Data.MySqlClient;
 
@@ -23,20 +24,13 @@ namespace CumulativeProject.Repositories
         /// Searches for teachers in the database based on a search query.
         /// </summary>
         /// <param name="searchQuery">The search query to filter teachers.</param>
-        /// <param name="selected">Optional list of columns to select.</param>
         /// <returns>A list of teachers matching the search query.</returns>
-        public List<Teacher> Search(string searchQuery, string[] selected = null)
+        public List<Teacher> Search(string searchQuery)
         {
-            // Check if selected is null and assign the empty array if needed
-            if (selected == null)
-            {
-                selected = new string[0];
-            }
-
             // assign list to store teacher results
             List <Teacher> teachers = new List <Teacher>();
 
-            string columns = selected.Length > 0 ? string.Join(", ", selected) : "*";
+            string columns = "*";
 
             string query = $"SELECT {columns} FROM {this.Table} where CONCAT(teacherfname, ' ', teacherlname) like @searchQuery  or employeenumber like @searchQuery;";
 
@@ -113,13 +107,45 @@ namespace CumulativeProject.Repositories
         public Teacher StoreTeacher(Teacher teacher)
         {
             Dictionary<string, object> userData = new Dictionary<string, object>();
-            userData["teacherfname"] = Teacher.FirstName;
-            userData["teacherlname"] = Teacher.LastName;
-            userData["employeenumber"] = Teacher.EmployeeNumber;
-            userData["hiredate"] = Teacher.HireDate;
-            userData["salary"] = Teacher.Salary;
+            userData["teacherfname"] = teacher.FirstName;
+            userData["teacherlname"] = teacher.LastName;
+            userData["employeenumber"] = teacher.EmployeeNumber;
+            userData["hiredate"] = teacher.HireDate;
+            userData["salary"] = teacher.Salary;
 
             this.Insert(userData);
+
+            teacher.Id = Convert.ToInt32(userData["id"]);
+            return teacher;
+        }
+
+        public Teacher UpdateTeacher(Teacher teacher)
+        {
+            string query = $"UPDATE {this.Table} SET teacherfname = @teacherfname, teacherlname = @teacherlname, employeenumber = @employeenumber, hiredate = @hiredate, salary = @salary where teacherid = @teacherid;";
+
+            Debug.WriteLine(query);
+            Debug.WriteLine(teacher.Id);
+            int rowsAffected = this.ExecuteNonQuery(
+                query,
+                new MySqlParameter("@teacherfname", teacher.FirstName),
+                new MySqlParameter("@teacherlname", teacher.LastName),
+                new MySqlParameter("@employeenumber", teacher.EmployeeNumber),
+                new MySqlParameter("@hiredate", teacher.HireDate),
+                new MySqlParameter("@salary", teacher.Salary),
+                new MySqlParameter("@teacherid", teacher.Id)
+            );
+            Debug.WriteLine($"rowsAffected: {rowsAffected}");
+            if( rowsAffected == 0)
+            {
+                throw new Exception("Failed to update Teacher");
+            }
+            return teacher;
+        }
+
+        public void DeleteTeacher(int id)
+        {
+            this.ClassRepository().UnassignedTeacherFromClasses(id);
+            this.Delete(id, "teacherid");
         }
 
         /// <summary>
@@ -146,9 +172,10 @@ namespace CumulativeProject.Repositories
             return teachers;
         }
 
-        public function DeleteTeacher(int id)
+        private ClassRepository ClassRepository()
         {
-            
+            return new ClassRepository();
         }
+
     }
 }

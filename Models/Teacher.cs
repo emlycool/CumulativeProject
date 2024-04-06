@@ -25,10 +25,14 @@ namespace CumulativeProject.Models
         [Required(ErrorMessage = "Hire date is required")]
         [DataType(DataType.Date)]
         [DisplayFormat(DataFormatString = "{0:yyyy-MM-dd}", ApplyFormatInEditMode = true)]
-        public DateTime HireDate { get; set; }
+        public DateTime? HireDate { get; set; }
 
         [Required(ErrorMessage = "Salary is required")]
         [Range(0, 1000000, ErrorMessage = "Salary must be between 0 and 1,000,000")]
-        public decimal Salary { get; set; }
+        public decimal? Salary { get; set; }
+
+        public string FormattedHireDate => this.HireDate.HasValue? this.HireDate.Value.ToString("dd/MM/yyyy") : "unknown date";
+
+        public string FormattedSalary => Salary.HasValue ? Salary.Value.ToString("C") : "unknown salary";
     }
 }

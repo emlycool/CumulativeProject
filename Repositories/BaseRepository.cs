@@ -1,8 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.SqlClient;
+using System.Diagnostics;
+using System.Linq;
 using CumulativeProject.Data;
 using CumulativeProject.Interfaces;
 using MySql.Data.MySqlClient;
+using Sprache;
 
 namespace CumulativeProject.Repositories
 {
@@ -26,7 +30,7 @@ namespace CumulativeProject.Repositories
         /// <param name="query">The SQL query to execute.</param>
         /// <param name="closure">The action to perform on the result set.</param>
         /// <param name="parameters">Optional parameters to include in the query.</param>
-        public void Query(string query, Action<MySqlDataReader, MySqlConnection> closure, params MySqlParameter[] parameters)
+        public void Query(string query, Action<MySqlDataReader, MySqlConnection> closure = null, params MySqlParameter[] parameters)
         {
             // Use try-with-resources to automatically close connection
             using (MySqlConnection Conn = this.dbContext.AccessDatabase())
@@ -49,12 +53,32 @@ namespace CumulativeProject.Repositories
                 // Gather Result Set of Query into a variable
                 MySqlDataReader ResultSet = cmd.ExecuteReader();
 
-                closure(ResultSet, Conn);
+                if (closure != null)
+                {
+                    closure(ResultSet, Conn);
+                }
+
 
                 Conn.Close();
             }
         }
 
+        public int ExecuteNonQuery(string query, params MySqlParameter[] parameters)
+        {
+            using (MySqlConnection Conn = this.dbContext.AccessDatabase())
+            {
+                Conn.Open();
+                int result;
+                using (MySqlCommand command = new MySqlCommand(query, Conn))
+                {
+                    command.Parameters.AddRange(parameters);
+                    result = command.ExecuteNonQuery();
+                }
+                Conn.Close();
+
+                return result;
+            }
+        }
 
         /// <summary>
         /// Inserts data into the table.
@@ -63,43 +87,54 @@ namespace CumulativeProject.Repositories
         public void Insert(Dictionary<string, object> values)
         {
             string columns = string.Join(", ", values.Keys);
-            string parameters = string.Join(", ", values.Keys);
-            string query = $"INSERT INTO {this.Table} ({columns}) VALUES ({parameters})";
+            string parameters = string.Join(", ", values.Keys.Select(key => "@" + key));
+            string query = $"INSERT INTO {this.Table} ({columns}) VALUES ({parameters});";
+
+            //Debug.WriteLine(query);
 
             List<MySqlParameter> parametersList = new List<MySqlParameter>();
 
             foreach (var pair in values)
             {
+                //Debug.WriteLine($" @{pair.Key} @{pair.Value}");
                 parametersList.Add(new MySqlParameter($"@{pair.Key}", pair.Value));
             }
 
-            this.Query(query, (reader, connection) => { }, parametersList.ToArray());
+            int rowsAffected = this.ExecuteNonQuery(query, parameters: parametersList.ToArray());
+            if(rowsAffected == 0)
+            {
+                throw new Exception("Failed to insert record");
+            }
+
+            string selectQuery = "SELECT LAST_INSERT_ID();";
+            this.Query(selectQuery, (reader, connection) => {
+                if (reader.Read())
+                {
+                    values["id"] = Convert.ToInt32(reader[0]);
+                }
+            });
         }
 
-        public void Delete(int id)
+        public void Delete(int id, string column = null)
         {
-            string queryCommand = $"Delete from {this.table} where id = @id";
+            column = column ?? "id";
+            string queryCommand = $"Delete from {this.Table} where {column} = @id";
+            MySqlParameter paramter = new MySqlParameter("@id", id);
+            
+            this.ExecuteNonQuery(queryCommand, parameters: paramter);
 
-            // parameter = 
         }
 
         /// <summary>
         /// Retrieves all rows from the table.
         /// </summary>
-        /// <param name="selected">Optional array of column names to select.</param>
         /// <returns>A list of dictionaries containing column name-value pairs for each row.</returns>
-        public List<Dictionary<string, object>> All(string[] selected = null)
+        public List<Dictionary<string, object>> All()
         {
-            // Check if selected is null and assign the empty array if needed
-            if (selected == null)
-            {
-                selected = new string[0];
-            }
-
             // Initialize a list to store the rows
             var rows = new List<Dictionary<string, object>>();
 
-            string columns = selected.Length > 0 ? string.Join(", ", selected) : "*";
+            string columns = "*";
             this.Query($"SELECT {columns} FROM {this.Table}", (MySqlDataReader reader, MySqlConnection Conn) =>
             {
                 // Read the data from the reader
