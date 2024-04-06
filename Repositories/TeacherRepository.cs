@@ -110,9 +110,16 @@ namespace CumulativeProject.Repositories
         }
 
 
-        public Teacher StoreTeacher()
+        public Teacher StoreTeacher(Teacher teacher)
         {
+            Dictionary<string, object> userData = new Dictionary<string, object>();
+            userData["teacherfname"] = Teacher.FirstName;
+            userData["teacherlname"] = Teacher.LastName;
+            userData["employeenumber"] = Teacher.EmployeeNumber;
+            userData["hiredate"] = Teacher.HireDate;
+            userData["salary"] = Teacher.Salary;
 
+            this.Insert(userData);
         }
 
         /// <summary>
@@ -139,6 +146,9 @@ namespace CumulativeProject.Repositories
             return teachers;
         }
 
-
+        public function DeleteTeacher(int id)
+        {
+            
+        }
     }
 }

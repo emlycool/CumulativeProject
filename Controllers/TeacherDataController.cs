@@ -55,7 +55,16 @@ namespace CumulativeProject.Controllers
                 return Json(new { success = false, errors = errors });
             }
 
-            return Ok(teacher);
+            Teacher storedTeacher = this.TeacherRepository.StoreTeacher(teacher);
+
+            return Ok(storedTeacher);
+        }
+
+        [HttpDelete]
+        [Route("api/teachers/{id}")]
+        public IHttpActionResult DeleteTeacher(int id)
+        {
+            
         }
     }
 }

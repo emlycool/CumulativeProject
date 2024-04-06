@@ -76,6 +76,13 @@ namespace CumulativeProject.Repositories
             this.Query(query, (reader, connection) => { }, parametersList.ToArray());
         }
 
+        public void Delete(int id)
+        {
+            string queryCommand = $"Delete from {this.table} where id = @id";
+
+            // parameter = 
+        }
+
         /// <summary>
         /// Retrieves all rows from the table.
         /// </summary>
