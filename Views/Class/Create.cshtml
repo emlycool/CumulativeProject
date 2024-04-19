@@ -1,0 +1,120 @@
+﻿@{
+    ViewBag.Title = "Create a new Teacher Class";
+}
+
+<div class="container">
+    <h1>Add a new Teacher Class</h1>
+    <form id="createClassForm" novalidate>
+        <div id="successAlert" class="alert alert-success d-none" role="alert">
+            Teacher Class created successfully.
+        </div>
+        <div id="errorAlert" class="alert alert-danger d-none" role="alert">
+            Failed to create Teacher Class.
+        </div>
+        <div class="form-group">
+            <label for="classCode">Class Code:</label>
+            <input type="text" class="form-control" id="classCode" placeholder="Enter class code" name="ClassCode" required>
+            <div class="invalid-feedback">Please enter class code.</div>
+        </div>
+        <div class="form-group">
+            <label for="teacherId">Teacher:</label>
+            <select class="form-control" id="teacherId" name="TeacherId" required>
+                <option value="">Select Teacher</option>
+                <!-- Populate this dropdown dynamically with teacher names -->
+            </select>
+            <div class="invalid-feedback">Please select a teacher.</div>
+        </div>
+        <div class="form-group">
+            <label for="className">Class Name:</label>
+            <input type="text" class="form-control" id="className" placeholder="Enter class name" name="ClassName" required>
+            <div class="invalid-feedback">Please enter class name.</div>
+        </div>
+        <div class="form-group">
+            <label for="startDate">Start Date:</label>
+            <input type="date" class="form-control" id="startDate" name="StartDate" required>
+            <div class="invalid-feedback">Please enter start date.</div>
+        </div>
+        <div class="form-group">
+            <label for="finishDate">Finish Date:</label>
+            <input type="date" class="form-control" id="finishDate" name="FinishDate" required>
+            <div class="invalid-feedback">Please enter finish date.</div>
+        </div>
+        <button type="submit" class="btn btn-primary">Create</button>
+    </form>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        fetch("/api/teachers")
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to fetch teachers');
+                }
+                return response.json();
+            })
+            .then(data => {
+                const teacherDropdown = document.getElementById('teacherId');
+                data.data.forEach(teacher => {
+                    const option = document.createElement('option');
+                    option.value = teacher.id;
+                    option.textContent = teacher.FullName;
+                    teacherDropdown.appendChild(option);
+                });
+            })
+            .catch(error => {
+                console.error('Error fetching teachers:', error);
+            });
+    });
+
+    document.getElementById('createClassForm').addEventListener('submit', function (event) {
+        event.preventDefault();
+        event.stopPropagation();
+
+        event.target.querySelector("button").textContent = "please wait ..."
+        event.target.querySelector("button").disabled = true;
+
+        // Check form validation
+        if (!this.checkValidity()) {
+            this.classList.add('was-validated');
+            return;
+        }
+
+        // Get form data
+        const formData = Object.fromEntries(new FormData(event.target));
+
+        // Send data to API endpoint
+        fetch("/api/classes", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(formData)
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to create Teacher Class');
+                }
+                return response.json();
+            })
+            .then(data => {
+                document.getElementById('successAlert').classList.remove('d-none');
+                document.getElementById('errorAlert').classList.add('d-none');
+                // Reset form
+                document.getElementById('createClassForm').reset();
+                document.getElementById('createClassForm').classList.remove('was-validated');
+            })
+            .catch(error => {
+                document.getElementById('successAlert').classList.add('d-none');
+                document.getElementById('errorAlert').classList.remove('d-none');
+            })
+            .finally(data => {
+                setTimeout(() => {
+                    document.getElementById('successAlert').classList.add('d-none');
+                    document.getElementById('errorAlert').classList.add('d-none');
+                }, 5000)
+
+                event.target.querySelector("button").textContent = "Create"
+                event.target.querySelector("button").disabled = false;
+            });
+    });
+</script>

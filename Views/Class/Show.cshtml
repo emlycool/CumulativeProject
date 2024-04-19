@@ -1,0 +1,35 @@
+﻿@model CumulativeProject.Models.ViewModels.ShowClassView
+
+@{
+    ViewBag.Title = $"{Model.TeacherClass.ClassName}";
+}
+
+<div class="container">
+    <h1>Show Teacher Details</h1>
+    <hr />
+    <div class="row">
+        <div class="col-md-6">
+            <dl class="row">
+                <dt class="col-sm-4">ID:</dt>
+                <dd class="col-sm-8">@Model.TeacherClass.Id</dd>
+
+                <dt class="col-sm-4">Class Name:</dt>
+                <dd class="col-sm-8">@Model.TeacherClass.ClassName</dd>
+
+                <dt class="col-sm-4">Class Code:</dt>
+                <dd class="col-sm-8">@Model.TeacherClass.ClassCode</dd>
+
+                <dt class="col-sm-4">Start Date:</dt>
+                <dd class="col-sm-8">@Model.TeacherClass.StartDate</dd>
+
+                <dt class="col-sm-4">Hire Date:</dt>
+                <dd class="col-sm-8">@Model.TeacherClass.FinishDate</dd>
+
+
+                <dt class="col-sm-4">Teacher Name:</dt>
+                <dd class="col-sm-8">@((Model.TeacherClass.Teacher?.FullName) ?? "Not Assigned")</dd>
+            </dl>
+        </div>
+
+    </div>
+</div>

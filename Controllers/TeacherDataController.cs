@@ -37,11 +37,13 @@ namespace CumulativeProject.Controllers
         {
             if (searchQuery == null)
             {
-                return Ok(this.TeacherRepository.All());
+                //return Ok(this.TeacherRepository.All());
+                return ResponseHelper.JsonResponse("Teachers retrieved successfully", HttpStatusCode.OK, true, data: this.TeacherRepository.All());
             }
             else
             {
-                return Ok(this.TeacherRepository.Search(searchQuery));
+                //return Ok(this.TeacherRepository.Search(searchQuery));
+                return ResponseHelper.JsonResponse("Teachers retrieved successfully", HttpStatusCode.OK, true, data: this.TeacherRepository.Search(searchQuery));
             }
         }
 

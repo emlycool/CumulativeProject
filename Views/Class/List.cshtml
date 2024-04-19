@@ -1,0 +1,124 @@
+﻿@{
+    ViewBag.Title = "Classes";
+}
+
+<div class="container">
+    <h1>Class List</h1>
+
+    <div class="d-flex justify-content-between">
+        <!-- Search Bar -->
+        <div>
+            <input id="search-input" type="text" class="form-control" placeholder="Search classes...">
+        </div>
+
+        <!-- Create Teacher -->
+        <div>
+            <a class="btn-primary btn" href="/classes/create">Create new class</a>
+        </div>
+    </div>
+
+    <table id="teachers-table" class="table table-striped">
+        <thead>
+            <tr>
+                <th>S/N</th>
+                <th>Class Code</th>
+                <th>Teacher Name</th>
+                <th>Start Date</th>
+                <th>Finish Date</th>
+                <th>Class Name</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Table body will be dynamically populated -->
+        </tbody>
+    </table>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const searchInput = document.querySelector("#search-input");
+        const tableBody = document.querySelector("#teachers-table tbody");
+
+        // Function to fetch classes data with optional search query
+        function fetchTeachers(searchQuery = "") {
+            const url = new URL("/api/classes", window.location.origin);
+            url.searchParams.append("searchQuery", searchQuery);
+
+            tableBody.innerHTML = `<tr><td colspan="7" class="text-center">Please wait ...</td></tr>`;
+
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+
+                    tableBody.innerHTML = "";
+
+                    data.data.forEach((teacherClass, index) => {
+                        const StartDate = new Date(teacherClass.StartDate).toLocaleDateString();
+                        const FinishDate = new Date(teacherClass.FinishDate).toLocaleDateString();
+                        const ClassName = teacherClass.ClassName;
+                        const ClassCode = teacherClass.ClassCode;
+                        const teacherName = teacherClass.Teacher?.FullName ?? "Not assigned"
+
+                        const row = `<tr>
+                        <td>${index + 1}</td>
+                        <td>${ClassCode}</td>
+                        <td>${teacherName}</td>
+                        <td>${StartDate}</td>
+                        <td>${FinishDate}</td>
+                        <td>${ClassName}</td>
+                        <td>
+                            <a class="btn-primary btn" href="/classes/${teacherClass.Id}">View</a>
+                            <a class="btn-success btn" href="/classes/edit/${teacherClass.Id}">Edit</a>
+                            <button class="btn-danger btn delete-class" data-id="${teacherClass.Id}">Delete</button>
+                        </tr>`;
+
+                        tableBody.innerHTML += row;
+                    });
+
+                    // Add event listeners to delete buttons
+                    const deleteButtons = document.querySelectorAll(".delete-class");
+                    deleteButtons.forEach(button => {
+                        button.addEventListener("click", function () {
+                            const teacherClassId = this.getAttribute("data-id");
+                            if (confirm("Are you sure you want to delete this class?")) {
+                                deleteClass(teacherClassId);
+                            }
+                        });
+                    });
+                })
+                .catch(error => {
+                    console.error("Error fetching classes:", error);
+                });
+        }
+
+        // Function to delete teacher
+        function deleteClass(teacherId) {
+            fetch(`/api/classes/${teacherId}`, {
+                method: 'DELETE'
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to delete class');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Teacher deleted:', data);
+                    alert('Class deleted successfully');
+                    fetchTeachers(searchInput.value);
+                })
+                .catch(error => {
+                    console.error('Error:', error.message);
+                    alert('Failed to delete class');
+                });
+        }
+
+        fetchTeachers();
+
+        searchInput.addEventListener("input", function () {
+            fetchTeachers(searchInput.value);
+        });
+
+    });
+</script>

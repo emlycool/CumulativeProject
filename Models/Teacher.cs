@@ -18,6 +18,8 @@ namespace CumulativeProject.Models
         [StringLength(50, ErrorMessage = "Last name may not be longer than 50 characters")]
         public string LastName { get; set; }
 
+        public string FullName => this.FirstName + " " + this.LastName;
+
         [Required(ErrorMessage = "Employee number is required")]
         [RegularExpression(@"^[A-Za-z0-9]+$", ErrorMessage = "Employee number can only contain letters and numbers")]
         public string EmployeeNumber { get; set; }

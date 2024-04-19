@@ -1,0 +1,125 @@
+﻿@model CumulativeProject.Models.TeacherClass
+@{
+    ViewBag.Title = "Edit Teacher Class";
+}
+
+<div class="container">
+    <h1>Edit Teacher Class</h1>
+    <form id="updateTeacherClassForm" novalidate>
+        <div id="successAlert" class="alert alert-success d-none" role="alert">
+            Teacher Class updated successfully.
+        </div>
+        <div id="errorAlert" class="alert alert-danger d-none" role="alert">
+            Failed to update Teacher Class.
+        </div>
+        <div class="form-group">
+            <label for="classCode">Class Code:</label>
+            <input type="text" class="form-control" id="classCode" placeholder="Enter class code" name="ClassCode" value="@Model.ClassCode" required>
+            <div class="invalid-feedback">Please enter class code.</div>
+        </div>
+        <div class="form-group">
+            <label for="teacherId">Teacher:</label>
+            <select class="form-control" id="teacherId" name="TeacherId" required>
+                <option value="">Select Teacher</option>
+                <!-- Populate this dropdown dynamically with teacher names -->
+            </select>
+            <div class="invalid-feedback">Please select a teacher.</div>
+        </div>
+        <div class="form-group">
+            <label for="className">Class Name:</label>
+            <input type="text" class="form-control" id="className" placeholder="Enter class name" name="ClassName" value="@Model.ClassName" required>
+            <div class="invalid-feedback">Please enter class name.</div>
+        </div>
+        <div class="form-group">
+            <label for="startDate">Start Date:</label>
+            <input type="date" class="form-control" id="startDate" name="StartDate" value="@(Model.StartDate?.ToString("yyyy-MM-dd"))" required>
+            <div class="invalid-feedback">Please enter start date.</div>
+        </div>
+        <div class="form-group">
+            <label for="finishDate">Finish Date:</label>
+            <input type="date" class="form-control" id="finishDate" name="FinishDate" value="@(Model.FinishDate?.ToString("yyyy-MM-dd"))" required>
+            <div class="invalid-feedback">Please enter finish date.</div>
+        </div>
+        <button type="submit" class="btn btn-primary">Update</button>
+    </form>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        fetch("/api/teachers")
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to fetch teachers');
+                }
+                return response.json();
+            })
+            .then(data => {
+                const teacherDropdown = document.getElementById('teacherId');
+                data.data.forEach(teacher => {
+                    const option = document.createElement('option');
+                    option.value = teacher.Id;
+                    option.textContent = teacher.FullName;
+
+                    if (teacher.Id == "@Model.TeacherId") {
+                        option.selected = true;
+                    }
+                    teacherDropdown.appendChild(option);
+                });
+            })
+            .catch(error => {
+                console.error('Error fetching teachers:', error);
+            });
+    });
+
+    document.getElementById('updateTeacherClassForm').addEventListener('submit', function (event) {
+        event.preventDefault();
+        event.stopPropagation();
+
+        // Check form validation
+        if (!this.checkValidity()) {
+            this.classList.add('was-validated');
+            return;
+        }
+
+        // Get form data
+        const formData = Object.fromEntries(new FormData(event.target));
+
+        event.target.querySelector("button").textContent = "please wait ..."
+        event.target.querySelector("button").disabled = true;
+
+        // Send data to API endpoint
+        fetch("/api/classes/@Model.Id", {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(formData)
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to update Teacher Class');
+                }
+                return response.json();
+            })
+            .then(data => {
+                document.getElementById('successAlert').classList.remove('d-none');
+                document.getElementById('errorAlert').classList.add('d-none')
+                document.getElementById('updateTeacherClassForm').classList.remove('was-validated');
+            })
+            .catch(error => {
+                document.getElementById('successAlert').classList.add('d-none');
+                document.getElementById('errorAlert').classList.remove('d-none');
+                event.target.querySelector("button").textContent = "Update"
+                event.target.querySelector("button").disabled = false;
+            })
+            .finally(data => {
+                setTimeout(() => {
+                    document.getElementById('successAlert').classList.add('d-none');
+                    document.getElementById('errorAlert').classList.add('d-none');
+                }, 5000)
+
+                event.target.querySelector("button").textContent = "Update"
+                event.target.querySelector("button").disabled = false;
+            });
+    });
+</script>

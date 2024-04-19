@@ -50,8 +50,8 @@
                         <tr>
                             <td>@(i + 1)</td>
                             <td>@teacherClass.ClassCode</td>
-                            <td>@teacherClass.StartDate.ToShortDateString()</td>
-                            <td>@teacherClass.FinishDate.ToShortDateString()</td>
+                            <td>@teacherClass.FormattedStartDate</td>
+                            <td>@teacherClass.FormattedFinishDate</td>
                             <td>@teacherClass.ClassName</td>
                         </tr>
                     }

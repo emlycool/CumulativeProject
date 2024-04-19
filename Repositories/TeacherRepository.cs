@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using CumulativeProject.Models;
 using MySql.Data.MySqlClient;
 
@@ -14,7 +15,7 @@ namespace CumulativeProject.Repositories
         /// Retrieves a list of all teachers from the database.
         /// </summary>
         /// <returns>A list of all teachers.</returns>
-        public List<Teacher> All()
+        public new List<Teacher> All()
         {
             List <Dictionary<string, object>> results = base.All();
             return this.HydrateCollection(results);
@@ -47,15 +48,7 @@ namespace CumulativeProject.Repositories
                     // Read the data from the reader
                     while (reader.Read())
                     {
-                        teachers.Add(new Teacher
-                        {
-                            Id = Convert.ToInt32(reader["teacherid"]),
-                            FirstName = Convert.ToString(reader["teacherfname"]),
-                            LastName = Convert.ToString(reader["teacherlname"]),
-                            EmployeeNumber = Convert.ToString(reader["employeenumber"]),
-                            HireDate = Convert.ToDateTime(reader["hiredate"]),
-                            Salary = Convert.ToDecimal(reader["salary"])
-                        });
+                        teachers.Add(this.HydrarteTeacherModel(reader));
                     }
                 },
                 parameters
@@ -86,21 +79,39 @@ namespace CumulativeProject.Repositories
                     // Read the data from the reader
                     while (reader.Read())
                     {
-                        teacher = new Teacher
-                        {
-                            Id = Convert.ToInt32(reader["teacherid"]),
-                            FirstName = Convert.ToString(reader["teacherfname"]),
-                            LastName = Convert.ToString(reader["teacherlname"]),
-                            EmployeeNumber = Convert.ToString(reader["employeenumber"]),
-                            HireDate = Convert.ToDateTime(reader["hiredate"]),
-                            Salary = Convert.ToDecimal(reader["salary"])
-                        };
+                        teacher = this.HydrarteTeacherModel(reader);
                     }
                 },
                 parameters
             );
 
             return teacher;
+        }
+
+
+        public List<Teacher> GetTeachersByIds(List<int> teacherIds)
+        {
+            List<Teacher> teachers = new List<Teacher>();
+
+            string query = $"SELECT * FROM {Table} WHERE teacherid IN ({string.Join(",", teacherIds.Select((_, index) => $"@id{index}"))})";
+
+            List<MySqlParameter> parameters = teacherIds.Select((id, index) => new MySqlParameter($"@id{index}", id)).ToList();
+
+            // Execute the query
+            Query(
+                query,
+                (MySqlDataReader reader, MySqlConnection Conn) =>
+                {
+                    while (reader.Read())
+                    {
+                        Teacher teacher = this.HydrarteTeacherModel(reader);
+                        teachers.Add(teacher);
+                    }
+                },
+                parameters.ToArray()
+            );
+
+            return teachers;
         }
 
 
@@ -123,8 +134,7 @@ namespace CumulativeProject.Repositories
         {
             string query = $"UPDATE {this.Table} SET teacherfname = @teacherfname, teacherlname = @teacherlname, employeenumber = @employeenumber, hiredate = @hiredate, salary = @salary where teacherid = @teacherid;";
 
-            Debug.WriteLine(query);
-            Debug.WriteLine(teacher.Id);
+
             int rowsAffected = this.ExecuteNonQuery(
                 query,
                 new MySqlParameter("@teacherfname", teacher.FirstName),
@@ -134,7 +144,7 @@ namespace CumulativeProject.Repositories
                 new MySqlParameter("@salary", teacher.Salary),
                 new MySqlParameter("@teacherid", teacher.Id)
             );
-            Debug.WriteLine($"rowsAffected: {rowsAffected}");
+
             if( rowsAffected == 0)
             {
                 throw new Exception("Failed to update Teacher");
@@ -147,7 +157,7 @@ namespace CumulativeProject.Repositories
             this.ClassRepository().UnassignedTeacherFromClasses(id);
             this.Delete(id, "teacherid");
         }
-
+        
         /// <summary>
         /// Hydrates a list of dictionaries representing teacher data into a list of Teacher objects.
         /// </summary>
@@ -159,15 +169,7 @@ namespace CumulativeProject.Repositories
 
             foreach (var item in results)
             {
-                teachers.Add(new Teacher
-                {
-                    Id = Convert.ToInt32(item["teacherid"]),
-                    FirstName = Convert.ToString(item["teacherfname"]),
-                    LastName = Convert.ToString(item["teacherlname"]),
-                    EmployeeNumber = Convert.ToString(item["employeenumber"]),
-                    HireDate = Convert.ToDateTime(item["hiredate"]),
-                    Salary = Convert.ToDecimal(item["salary"])
-                });
+                teachers.Add(this.HydrarteTeacherModel(item));
             }
             return teachers;
         }
@@ -177,5 +179,40 @@ namespace CumulativeProject.Repositories
             return new ClassRepository();
         }
 
+        public Teacher HydrarteTeacherModel(Dictionary<string, object> reader)
+        {
+            Teacher teacher = null;
+            if (reader["teacherid"] != DBNull.Value)
+            {
+                teacher = new Teacher();
+                teacher.Id = Convert.ToInt32(reader["teacherid"]);
+                teacher.FirstName = Convert.ToString(reader["teacherfname"]);
+                teacher.LastName = Convert.ToString(reader["teacherlname"]);
+                teacher.EmployeeNumber = Convert.ToString(reader["employeenumber"]);
+                teacher.HireDate = Convert.ToDateTime(reader["hiredate"]);
+                teacher.Salary = Convert.ToDecimal(reader["salary"]);
+
+            }
+
+            return teacher;
+        }
+
+        public Teacher HydrarteTeacherModel(MySqlDataReader reader)
+        {
+            Teacher teacher = null;
+            if (reader["teacherid"] != DBNull.Value)
+            {
+                teacher = new Teacher();
+                teacher.Id = Convert.ToInt32(reader["teacherid"]);
+                teacher.FirstName = Convert.ToString(reader["teacherfname"]);
+                teacher.LastName = Convert.ToString(reader["teacherlname"]);
+                teacher.EmployeeNumber = Convert.ToString(reader["employeenumber"]);
+                teacher.HireDate = Convert.ToDateTime(reader["hiredate"]);
+                teacher.Salary = Convert.ToDecimal(reader["salary"]);
+
+            }
+
+            return teacher;
+        }
     }
 }
