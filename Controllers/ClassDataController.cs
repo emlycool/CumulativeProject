@@ -67,6 +67,43 @@ namespace CumulativeProject.Controllers
             return ResponseHelper.JsonResponse("Class deleted successfully", HttpStatusCode.OK, true);
         }
 
+        /// <summary>
+        /// Creates a new teacher class.
+        /// </summary>
+        /// <remarks>
+        /// <para>This endpoint allows you to create a new teacher class by providing the necessary details in the request body.</para>
+        /// <para><b>Example:</b></para>
+        /// <code>
+        /// curl -X POST -k -H "Content-Type: application/json" -d '{"ClassCode": "ABC123", "StartDate": "2024-04-05", "FinishDate": "2024-05-05", "ClassName": "Mathematics", "TeacherId": 1}' https://localhost:44302/api/classes
+        /// </code>
+        /// <para><b>Success Response:</b></para>
+        /// <code>
+        /// {
+        ///   "message": "Class created successfully",
+        ///   "statusCode": 201,
+        ///   "success": true,
+        ///   "data": {
+        ///     "Id": 1,
+        ///     "ClassCode": "ABC123",
+        ///     "StartDate": "2024-04-05T00:00:00",
+        ///     "FinishDate": "2024-05-05T00:00:00",
+        ///     "ClassName": "Mathematics",
+        ///     "TeacherId": 1
+        ///   }
+        /// }
+        /// </code>
+        /// <para><b>Error Response:</b></para>
+        /// <code>
+        /// {
+        ///   "message": "Request is invalid",
+        ///   "success": false,
+        ///   "errors": {
+        ///     "StartDate": "Start date cannot be after finish date"
+        ///   },
+        ///   "data": null
+        /// }
+        /// </code>
+        /// </remarks>
         [HttpPost]
         [Route("api/classes")]
         public IHttpActionResult StoreTeacher([FromBody] TeacherClass teacherClass)
@@ -89,6 +126,44 @@ namespace CumulativeProject.Controllers
             return ResponseHelper.JsonResponse("Class created successfully", HttpStatusCode.Created, true, data: storedTeacher);
         }
 
+        /// <summary>
+        /// Updates an existing teacher class.
+        /// </summary>
+        /// <remarks>
+        /// <para>This endpoint allows you to update an existing teacher class by providing the class ID in the URL and the updated details in the request body.</para>
+        /// <para><b>Example:</b></para>
+        /// <code>
+        /// curl -X PUT -k -H "Content-Type: application/json" -d '{"ClassCode": "DEF456", "StartDate": "2024-04-10", "FinishDate": "2024-05-10", "ClassName": "Science", "TeacherId": 2}' https://localhost:44302/api/classes/1
+        /// </code>
+        /// <para><b>Success Response:</b></para>
+        /// <code>
+        /// {
+        ///   "message": "Teacher updated successfully",
+        ///   "statusCode": 200,
+        ///   "success": true,
+        ///   "data": {
+        ///     "Id": 1,
+        ///     "ClassCode": "DEF456",
+        ///     "StartDate": "2024-04-10T00:00:00",
+        ///     "FormattedStartDate": "10/04/2024",
+        ///     "FinishDate": "2024-05-10T00:00:00",
+        ///     "FormattedFinishDate": "10/05/2024",
+        ///     "ClassName": "Science",
+        ///     "TeacherId": 2
+        ///   }
+        /// }
+        /// </code>
+        /// <para><b>Error Response:</b></para>
+        /// <code>
+        /// {
+        ///   "message": "Request is invalid",
+        ///   "success": false,
+        ///   "errors": {
+        ///     "teacherClass.ClassName": "Class name is required"
+        ///   }
+        /// }
+        /// </code>
+        /// </remarks>
         [HttpPost, HttpPut]
         [Route("api/classes/{id}")]
         public IHttpActionResult UpdateTeacher(int id, [FromBody] TeacherClass teacherClass)
